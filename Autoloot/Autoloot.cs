@@ -13,32 +13,66 @@ namespace Oxide.Plugins
     public class Autoloot : RustPlugin
     {
         bool canLoot = false;
-        BasePlayer p;
-        BaseEntity e;
+        BasePlayer globalPlayer;
+        BaseEntity globalEntity;
 
         void OnFrame()
         {
             if (canLoot)
             {
-                if (e as LootableCorpse)
+                if (globalEntity as LootableCorpse)
                 {
-                    var corpse = e as LootableCorpse;
+                    var corpse = globalEntity as LootableCorpse;
                     foreach (var container in corpse.containers)
                     {
                         foreach (var item in container.itemList.ToList())
                         {
-                            p.inventory.GiveItem(item);
+                            globalPlayer.inventory.GiveItem(item);
                         }
                     }
                 }
                 else
                 {
-                    if (e as StorageContainer)
+                    if (globalEntity as StorageContainer)
                     {
-                        var container = e as StorageContainer;
+                        var container = globalEntity as StorageContainer;
                         foreach (var item in container.inventory.itemList.ToList())
                         {
-                            p.inventory.GiveItem(item);
+                            globalPlayer.inventory.GiveItem(item);
+                        }
+                    }
+                    else
+                    {
+                        if (globalEntity as DroppedItemContainer)
+                        {
+                            var backpack = globalEntity as DroppedItemContainer;
+                            foreach (var item in backpack.inventory.itemList.ToList())
+                            {
+                                globalPlayer.inventory.GiveItem(item);
+                            }
+                        }
+                        else
+                        {
+                            if (globalEntity as BasePlayer)
+                            {
+                                var sleeper = globalEntity as BasePlayer;
+                                foreach (var item in sleeper.inventory.containerMain.itemList.ToList())
+                                {
+                                    globalPlayer.inventory.GiveItem(item);
+                                }
+                                foreach (var item in sleeper.inventory.containerBelt.itemList.ToList())
+                                {
+                                    globalPlayer.inventory.GiveItem(item);
+                                }
+                                foreach (var item in sleeper.inventory.containerWear.itemList.ToList())
+                                {
+                                    globalPlayer.inventory.GiveItem(item);
+                                }
+                            }
+                            else
+                            {
+                                return;
+                            }
                         }
                     }
                 }
@@ -48,8 +82,8 @@ namespace Oxide.Plugins
 
         void OnLootEntity(BasePlayer player, BaseEntity entity)
         {
-            p = player;
-            e = entity;
+            globalPlayer = player;
+            globalEntity = entity;
 
             CuiElementContainer elements = new CuiElementContainer();
             var panel = elements.Add(new CuiPanel
@@ -84,6 +118,8 @@ namespace Oxide.Plugins
 
         void OnLootEntityEnd(BasePlayer player, BaseCombatEntity entity)
         {
+            globalPlayer = null;
+            globalEntity = null;
             CuiHelper.DestroyUi(player, "panel");
         }
 
