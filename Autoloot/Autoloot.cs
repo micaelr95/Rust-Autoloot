@@ -103,7 +103,7 @@ namespace Oxide.Plugins
             {
                 Button =
                 {
-                    Command = "corpse.loot",
+                    Command = "autoloot",
                     Color = "0.8 0.8 0.8 0.2"
                 },
                 Text =
@@ -123,7 +123,7 @@ namespace Oxide.Plugins
             CuiHelper.DestroyUi(player, "panel");
         }
 
-        [ConsoleCommand("corpse.loot")]
+        [ConsoleCommand("autoloot")]
         void CanLoot()
         {
             canLoot = true;
